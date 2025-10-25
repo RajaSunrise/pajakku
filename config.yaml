@@ -1,0 +1,22 @@
+server:
+  port: "8000"
+  mode: "development"
+
+database:
+  host: "127.0.0.1"
+  port: 5432
+  user: "postgres"
+  password: "yourpassword"
+  name: "pajakku"
+  ssl_mode: "disable"
+  time_zone: "Asia/Jakarta"
+
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+
+jwt:
+  secret: "your-secret-key"
+  expiry_hour: 24
