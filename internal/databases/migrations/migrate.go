@@ -1,15 +1,13 @@
 package migrations
 
 import (
-	"fmt"
-	"log"
-	"os"
-
 	"github.com/RajaSunrise/pajakku/internal/databases"
 	"github.com/RajaSunrise/pajakku/internal/models"
+	"github.com/sirupsen/logrus"
 )
 
 func Migrate() {
+	logrus.Info("Starting database migration")
 	err := databases.DB.AutoMigrate(
 		&models.UserProfile{},
 		&models.UserAuth{},
@@ -18,10 +16,7 @@ func Migrate() {
 		&models.PasswordResetToken{},
 	)
 	if err != nil {
-		panic(err)
+		logrus.WithError(err).Fatal("Failed to migrate database")
 	}
-	if _, err := fmt.Fprintln(os.Stdout, []any{"Succes to migrate"}); err != nil {
-		log.Fatalf("Failed to print message: %v", err)
-	}
-
+	logrus.Info("Database migration completed successfully")
 }

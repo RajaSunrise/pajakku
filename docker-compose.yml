@@ -6,7 +6,7 @@ services:
     container_name: pajakku_postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: pajakku
     ports:
       - "5432:5432"
@@ -23,27 +23,6 @@ services:
     networks:
       - pajakku_network
 
-  # app:
-  #   build: .
-  #   container_name: pajakku_app
-  #   ports:
-  #     - "8000:8000"
-  #   environment:
-  #     SERVER_PORT: "8000"
-  #     SERVER_MODE: "development"
-  #     DB_HOST: postgres
-  #     DB_PORT: 5432
-  #     DB_USER: postgres
-  #     DB_PASSWORD: postgres
-  #     DB_NAME: pajakku
-  #     REDIS_HOST: redis
-  #     REDIS_PORT: 6379
-  #     JWT_SECRET: "your-secret-key"
-  #   depends_on:
-  #     - postgres
-  #     - redis
-  #   networks:
-  #     - pajakku_network
 
   prometheus:
     image: prom/prometheus:latest
@@ -51,9 +30,9 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+     - ./prometheus.yml:/etc/prometheus/prometheus.yml:z
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+    - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
       - pajakku_network
 

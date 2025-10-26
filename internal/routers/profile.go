@@ -12,12 +12,13 @@ import (
 func SetupRouteProfile(app *fiber.App) {
 	// Initialization Depencies
 	repo := repository.NewUserProfileRepository(databases.DB)
-	svc := service.NewUserProfileService(repo)
+	authRepo := repository.NewUsersAuthRepository(databases.DB)
+	svc := service.NewUserProfileService(repo, authRepo)
 	handler := handlers.NewUsersProfileHandler(svc)
 
 	// Routes Data Pajak/Profile Pajak
 	users := app.Group("/api/v1/users")
 	users.Post("/", middlewares.JWTAuth(), handler.CreateUsersProfile)
-	users.Post("/:id", middlewares.JWTAuth(), handler.UpdateUsersProfile)
-	users.Get("/:id", middlewares.JWTAuth(), handler.GetProfileByID)
+	users.Put("/", middlewares.JWTAuth(), handler.UpdateUsersProfile)
+	users.Get("/", middlewares.JWTAuth(), handler.GetProfileByID)
 }

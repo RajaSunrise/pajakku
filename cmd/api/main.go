@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,9 +10,11 @@ import (
 	"github.com/RajaSunrise/pajakku/internal/databases/migrations"
 	"github.com/RajaSunrise/pajakku/internal/routers"
 	"github.com/gofiber/fiber/v2"
+	"github.com/sirupsen/logrus"
 )
 
-func main() {
+
+func run(shutdown chan os.Signal) error {
 	// Load configuration
 	config.LoadConfig()
 
@@ -34,14 +34,25 @@ func main() {
 
 	go func() {
 		port := config.AppConfig.Server.Port
+		logrus.Infof("Server starting on port %s", port)
 		if err := app.Listen(":" + port); err != nil {
-			log.Fatalf("Error Running Server: %v", err)
+			logrus.Errorf("Error Running Server: %v", err)
 		}
 	}()
 
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+	if shutdown == nil {
+		signals := make(chan os.Signal, 1)
+		signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+		<-signals
+	} else {
+		<-shutdown
+	}
+	logrus.Info("Shutting down server")
+	return nil
+}
 
-	<-signals
-	fmt.Println("Shutting down server")
+func main() {
+	if err := run(nil); err != nil {
+		logrus.Fatal(err)
+	}
 }

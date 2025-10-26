@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -12,6 +13,11 @@ type Config struct {
 	Database DatabaseConfig `mapstructure:"database"`
 	Redis    RedisConfig    `mapstructure:"redis"`
 	JWT      JWTConfig      `mapstructure:"jwt"`
+	Log      LogConfig      `mapstructure:"log"`
+}
+
+type LogConfig struct {
+	Level string `mapstructure:"level"`
 }
 
 type ServerConfig struct {
@@ -60,6 +66,7 @@ func LoadConfig() {
 	viper.SetDefault("redis.db", 0)
 	viper.SetDefault("jwt.secret", "your-secret-key")
 	viper.SetDefault("jwt.expiry_hour", 24)
+	viper.SetDefault("log.level", "info")
 
 	// Read from config file
 	viper.SetConfigName("config")
@@ -103,9 +110,32 @@ func LoadConfig() {
 	if name := os.Getenv("DB_NAME"); name != "" {
 		AppConfig.Database.Name = name
 	}
+	if timezone := os.Getenv("TimeZone"); timezone != "" {
+		AppConfig.Database.TimeZone = timezone
+	}
 	if secret := os.Getenv("JWT_SECRET"); secret != "" {
 		AppConfig.JWT.Secret = secret
 	}
 
 	log.Println("Config loaded successfully")
+
+	// Setup logrus
+	setupLogrus()
+}
+
+func setupLogrus() {
+	level, err := logrus.ParseLevel(AppConfig.Log.Level)
+	if err != nil {
+		logrus.SetLevel(logrus.InfoLevel)
+	} else {
+		logrus.SetLevel(level)
+	}
+
+	if AppConfig.Server.Mode == "development" {
+		logrus.SetFormatter(&logrus.TextFormatter{
+			FullTimestamp: true,
+		})
+	} else {
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+	}
 }

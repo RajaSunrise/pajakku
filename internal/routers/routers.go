@@ -1,8 +1,13 @@
 package routers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+)
 
-func Routes(app *fiber.App)  {
+func Routes(app *fiber.App) {
+	// Setup Middlewares
+	SetupMiddleware(app)
+	
 	// Setup routes Auth
 	SetupRouteAuth(app)
 
@@ -14,4 +19,7 @@ func Routes(app *fiber.App)  {
 
 	// Setup routes billings
 	SetupRouteBiling(app)
+
+	// Setup routes metrics
+	SetupRouteMetrics(app)
 }

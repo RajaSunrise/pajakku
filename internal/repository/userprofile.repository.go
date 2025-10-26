@@ -8,6 +8,7 @@ import (
 type UserProfileRepository interface {
 	CreateProfile(profile *models.UserProfile) error
 	GetProfileByID(id uint) (*models.UserProfile, error)
+	GetProfileByUserID(userID uint) (*models.UserProfile, error)
 	GetProfileByNPWP(npwp string) (*models.UserProfile, error)
 	UpdateProfile(profile *models.UserProfile) error
 	DeleteProfile(id uint) error
@@ -28,6 +29,12 @@ func (r *userProfileRepository) CreateProfile(profile *models.UserProfile) error
 func (r *userProfileRepository) GetProfileByID(id uint) (*models.UserProfile, error) {
 	var profile models.UserProfile
 	err := r.db.First(&profile, id).Error
+	return &profile, err
+}
+
+func (r *userProfileRepository) GetProfileByUserID(userID uint) (*models.UserProfile, error) {
+	var profile models.UserProfile
+	err := r.db.Joins("UserAuth").Where(`"UserAuth".id = ?`, userID).First(&profile).Error;
 	return &profile, err
 }
 
