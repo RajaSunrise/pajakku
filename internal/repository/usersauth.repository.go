@@ -9,10 +9,10 @@ import (
 type UsersAuthRepository interface {
 	CreateUser(user *models.UserAuth) error
 	GetUserByEmail(email string) (*models.UserAuth, error)
-	GetUserByID(id uint) (*models.UserAuth, error)
+	GetUserByID(id string) (*models.UserAuth, error)
 	UpdateUser(user *models.UserAuth) error
-	UpdateUserProfileID(userID uint, profileID uint) error
-	DeleteUser(id uint) error
+	UpdateUserProfileID(userID string, profileID uint) error
+	DeleteUser(id string) error
 	CreatePasswordResetToken(token *models.PasswordResetToken) error
 	GetPasswordResetToken(token string) (*models.PasswordResetToken, error)
 	DeletePasswordResetToken(token string) error
@@ -36,9 +36,9 @@ func (r *usersAuthRepository) GetUserByEmail(email string) (*models.UserAuth, er
 	return &user, err
 }
 
-func (r *usersAuthRepository) GetUserByID(id uint) (*models.UserAuth, error) {
+func (r *usersAuthRepository) GetUserByID(id string) (*models.UserAuth, error) {
 	var user models.UserAuth
-	err := r.db.First(&user, id).Error
+	err := r.db.Where("id = ?", id).First(&user).Error
 	return &user, err
 }
 
@@ -46,11 +46,11 @@ func (r *usersAuthRepository) UpdateUser(user *models.UserAuth) error {
 	return r.db.Save(user).Error
 }
 
-func (r *usersAuthRepository) UpdateUserProfileID(userID uint, profileID uint) error {
+func (r *usersAuthRepository) UpdateUserProfileID(userID string, profileID uint) error {
 	return r.db.Model(&models.UserAuth{}).Where("id = ?", userID).Update("user_profile_id", profileID).Error
 }
 
-func (r *usersAuthRepository) DeleteUser(id uint) error {
+func (r *usersAuthRepository) DeleteUser(id string) error {
 	return r.db.Where("id = ?", id).Delete(&models.UserAuth{}).Error
 }
 

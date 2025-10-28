@@ -4,13 +4,13 @@ import "time"
 
 type LoginResponse struct {
 	Token     string `json:"token"`
-	UserID    uint   `json:"user_id"`
+	UserID    string `json:"user_id"`
 	Email     string `json:"email"`
 	ExpiresAt int64  `json:"expires_at"`
 }
 
 type UserProfileResponse struct {
-	ID             uint      `json:"id"`
+	NIK            uint    `json:"nik"`
 	NPWP           string    `json:"npwp"`
 	NamaWajibPajak string    `json:"nama_wajib_pajak"`
 	TipeWajibPajak string    `json:"tipe_wajib_pajak"`
@@ -21,7 +21,7 @@ type UserProfileResponse struct {
 }
 
 type UserAuthResponse struct {
-	ID            uint       `json:"id"`
+	ID            string     `json:"id"`
 	UserProfileID uint       `json:"user_profile_id"`
 	FotoProfil    string     `json:"foto_profil"`
 	Email         string     `json:"email"`

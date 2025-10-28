@@ -11,11 +11,11 @@ import (
 )
 
 type UserProfileService interface {
-	CreateProfile(userID uint, req *request.CreateUsersProfile) (*response.UserProfileResponse, error)
-	GetProfileByID(id uint) (*response.UserProfileResponse, error)
-	GetProfileByUserID(userID uint) (*response.UserProfileResponse, error)
-	UpdateProfile(id uint, req *request.UpdateUsersProfile) (*response.UserProfileResponse, error)
-	DeleteProfile(id uint) error
+	CreateProfile(userID string, req *request.CreateUsersProfile) (*response.UserProfileResponse, error)
+	GetProfileByNIK(nik uint) (*response.UserProfileResponse, error)
+	GetProfileByUserID(userID string) (*response.UserProfileResponse, error)
+	UpdateProfileByNIK(nik uint, req *request.UpdateUsersProfile) (*response.UserProfileResponse, error)
+	DeleteProfileByNIK(nik uint) error
 }
 
 type userProfileService struct {
@@ -27,7 +27,7 @@ func NewUserProfileService(repo repository.UserProfileRepository, authRepo repos
 	return &userProfileService{repo: repo, authRepo: authRepo}
 }
 
-func (s *userProfileService) CreateProfile(userID uint, req *request.CreateUsersProfile) (*response.UserProfileResponse, error) {
+func (s *userProfileService) CreateProfile(userID string, req *request.CreateUsersProfile) (*response.UserProfileResponse, error) {
 	logrus.WithFields(logrus.Fields{"userID": userID, "npwp": req.NPWP}).Info("Create profile service called")
 
 	// Check if NPWP already exists
@@ -35,6 +35,13 @@ func (s *userProfileService) CreateProfile(userID uint, req *request.CreateUsers
 	if err == nil {
 		logrus.WithField("npwp", req.NPWP).Warn("NPWP already exists")
 		return nil, errors.New("NPWP already exists")
+	}
+
+	// Chek If NIk already exists
+	_, err2 := s.repo.GetProfileByNIK(req.NIK)
+	if err2 == nil {
+		logrus.WithField("npwp", req.NPWP).Warn("NPWP already exists")
+		return nil, errors.New("NIK already exists")
 	}
 
 	// Check if UserAuth exists
@@ -51,6 +58,7 @@ func (s *userProfileService) CreateProfile(userID uint, req *request.CreateUsers
 	}
 
 	profile := &models.UserProfile{
+		NIK:            req.NIK,
 		NPWP:           req.NPWP,
 		NamaWajibPajak: req.NamaWajibPajak,
 		TipeWajibPajak: req.TipeWajibPajak,
@@ -65,18 +73,18 @@ func (s *userProfileService) CreateProfile(userID uint, req *request.CreateUsers
 	}
 
 	// Update UserAuth with UserProfileID
-	err = s.authRepo.UpdateUserProfileID(userID, profile.ID)
+	err = s.authRepo.UpdateUserProfileID(userID, profile.NIK)
 	if err != nil {
 		logrus.WithError(err).WithField("userID", userID).Error("Failed to update user profile ID, deleting created profile")
 		// If update fails, delete the created profile to maintain consistency
-		s.repo.DeleteProfile(profile.ID)
+		s.repo.DeleteProfileByNIK(profile.NIK)
 		return nil, err
 	}
 
 	logrus.WithField("userID", userID).Info("Profile created successfully")
 
 	return &response.UserProfileResponse{
-		ID:             profile.ID,
+		NIK:            profile.NIK,
 		NPWP:           profile.NPWP,
 		NamaWajibPajak: profile.NamaWajibPajak,
 		TipeWajibPajak: profile.TipeWajibPajak,
@@ -87,19 +95,19 @@ func (s *userProfileService) CreateProfile(userID uint, req *request.CreateUsers
 	}, nil
 }
 
-func (s *userProfileService) GetProfileByID(id uint) (*response.UserProfileResponse, error) {
-	logrus.WithField("profileID", id).Info("Get profile by ID service called")
+func (s *userProfileService) GetProfileByNIK(nik uint) (*response.UserProfileResponse, error) {
+	logrus.WithField("nik", nik).Info("Get profile by NIK service called")
 
-	profile, err := s.repo.GetProfileByID(id)
+	profile, err := s.repo.GetProfileByNIK(nik)
 	if err != nil {
-		logrus.WithError(err).WithField("profileID", id).Warn("Profile not found")
+		logrus.WithError(err).WithField("nik", nik).Warn("Profile not found")
 		return nil, err
 	}
 
-	logrus.WithField("profileID", id).Info("Profile retrieved successfully")
+	logrus.WithField("nik", nik).Info("Profile retrieved successfully")
 
 	return &response.UserProfileResponse{
-		ID:             profile.ID,
+		NIK:            profile.NIK,
 		NPWP:           profile.NPWP,
 		NamaWajibPajak: profile.NamaWajibPajak,
 		TipeWajibPajak: profile.TipeWajibPajak,
@@ -110,7 +118,7 @@ func (s *userProfileService) GetProfileByID(id uint) (*response.UserProfileRespo
 	}, nil
 }
 
-func (s *userProfileService) GetProfileByUserID(userID uint) (*response.UserProfileResponse, error) {
+func (s *userProfileService) GetProfileByUserID(userID string) (*response.UserProfileResponse, error) {
 	logrus.WithField("userID", userID).Info("Get profile by user ID service called")
 
 	profile, err := s.repo.GetProfileByUserID(userID)
@@ -122,7 +130,7 @@ func (s *userProfileService) GetProfileByUserID(userID uint) (*response.UserProf
 	logrus.WithField("userID", userID).Info("Profile retrieved successfully")
 
 	return &response.UserProfileResponse{
-		ID:             profile.ID,
+		NIK:            profile.NIK,
 		NPWP:           profile.NPWP,
 		NamaWajibPajak: profile.NamaWajibPajak,
 		TipeWajibPajak: profile.TipeWajibPajak,
@@ -133,24 +141,36 @@ func (s *userProfileService) GetProfileByUserID(userID uint) (*response.UserProf
 	}, nil
 }
 
-func (s *userProfileService) UpdateProfile(id uint, req *request.UpdateUsersProfile) (*response.UserProfileResponse, error) {
-	logrus.WithField("profileID", id).Info("Update profile service called")
+func (s *userProfileService) UpdateProfileByNIK(nik uint, req *request.UpdateUsersProfile) (*response.UserProfileResponse, error) {
+	logrus.WithField("nik", nik).Info("Update profile service called")
 
-	profile, err := s.repo.GetProfileByID(id)
+	profile, err := s.repo.GetProfileByNIK(nik)
 	if err != nil {
-		logrus.WithError(err).WithField("profileID", id).Warn("Profile not found for update")
+		logrus.WithError(err).WithField("nik", nik).Warn("Profile not found for update")
 		return nil, err
+	}
+
+	if req.NIK != 0 {
+		// Check if new NIK already exists and not the current profile
+		existingProfile, err := s.repo.GetProfileByNIK(req.NIK)
+		if err == nil && existingProfile.NIK != nik {
+			logrus.WithField("nik", req.NIK).Warn("NIK already exists")
+			return nil, errors.New("NIK already exists")
+		}
+
+		profile.NIK = req.NIK
 	}
 
 	if req.NPWP != "" {
 		// Check if new NPWP already exists and not the current profile
 		existingProfile, err := s.repo.GetProfileByNPWP(req.NPWP)
-		if err == nil && existingProfile.ID != id {
+		if err == nil && existingProfile.NIK != nik {
 			logrus.WithField("npwp", req.NPWP).Warn("NPWP already exists")
 			return nil, errors.New("NPWP already exists")
 		}
 		profile.NPWP = req.NPWP
 	}
+
 	if req.NamaWajibPajak != "" {
 		profile.NamaWajibPajak = req.NamaWajibPajak
 	}
@@ -166,14 +186,14 @@ func (s *userProfileService) UpdateProfile(id uint, req *request.UpdateUsersProf
 
 	err = s.repo.UpdateProfile(profile)
 	if err != nil {
-		logrus.WithError(err).WithField("profileID", id).Error("Failed to update profile")
+		logrus.WithError(err).WithField("nik", nik).Error("Failed to update profile")
 		return nil, err
 	}
 
-	logrus.WithField("profileID", id).Info("Profile updated successfully")
+	logrus.WithField("nik", nik).Info("Profile updated successfully")
 
 	return &response.UserProfileResponse{
-		ID:             profile.ID,
+		NIK:            profile.NIK,
 		NPWP:           profile.NPWP,
 		NamaWajibPajak: profile.NamaWajibPajak,
 		TipeWajibPajak: profile.TipeWajibPajak,
@@ -184,15 +204,15 @@ func (s *userProfileService) UpdateProfile(id uint, req *request.UpdateUsersProf
 	}, nil
 }
 
-func (s *userProfileService) DeleteProfile(id uint) error {
-	logrus.WithField("profileID", id).Info("Delete profile service called")
+func (s *userProfileService) DeleteProfileByNIK(nik uint) error {
+	logrus.WithField("nik", nik).Info("Delete profile service called")
 
-	err := s.repo.DeleteProfile(id)
+	err := s.repo.DeleteProfileByNIK(nik)
 	if err != nil {
-		logrus.WithError(err).WithField("profileID", id).Error("Failed to delete profile")
+		logrus.WithError(err).WithField("nik", nik).Error("Failed to delete profile")
 		return err
 	}
 
-	logrus.WithField("profileID", id).Info("Profile deleted successfully")
+	logrus.WithField("nik", nik).Info("Profile deleted successfully")
 	return nil
 }

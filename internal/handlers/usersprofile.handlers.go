@@ -17,7 +17,7 @@ func NewUsersProfileHandler(service service.UserProfileService) *UsersProfileHan
 
 func (h *UsersProfileHandler) CreateUsersProfile(c *fiber.Ctx) error {
 	logrus.WithField("userID", c.Locals("userID")).Info("Create profile request received")
-	userID := c.Locals("userID").(uint)
+	userID := c.Locals("userID").(string)
 	var req request.CreateUsersProfile
 	if err := c.BodyParser(&req); err != nil {
 		logrus.WithError(err).WithField("userID", userID).Warn("Failed to parse create profile request body")
@@ -38,7 +38,7 @@ func (h *UsersProfileHandler) CreateUsersProfile(c *fiber.Ctx) error {
 }
 
 func (h *UsersProfileHandler) GetProfileByID(c *fiber.Ctx) error {
-	userID := c.Locals("userID").(uint)
+	userID := c.Locals("userID").(string)
 	logrus.WithField("userID", userID).Info("Get profile request received")
 
 	resp, err := h.service.GetProfileByUserID(userID)
@@ -54,7 +54,7 @@ func (h *UsersProfileHandler) GetProfileByID(c *fiber.Ctx) error {
 }
 
 func (h *UsersProfileHandler) UpdateUsersProfile(c *fiber.Ctx) error {
-	userID := c.Locals("userID").(uint)
+	userID := c.Locals("userID").(string)
 	logrus.WithField("userID", userID).Info("Update profile request received")
 	var req request.UpdateUsersProfile
 	if err := c.BodyParser(&req); err != nil {
@@ -73,7 +73,7 @@ func (h *UsersProfileHandler) UpdateUsersProfile(c *fiber.Ctx) error {
 		})
 	}
 
-	resp, err := h.service.UpdateProfile(profileResp.ID, &req)
+	resp, err := h.service.UpdateProfileByNIK(profileResp.NIK, &req)
 	if err != nil {
 		logrus.WithError(err).WithField("userID", userID).Error("Failed to update profile")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

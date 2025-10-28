@@ -9,7 +9,7 @@ import (
 
 // Users model
 type UserAuth struct {
-	ID            uint   `gorm:"primaryKey"`
+	ID            string `gorm:"primaryKey;type:varchar(10);uniqueIndex;not null"`
 	UserProfileID *uint  `gorm:"index"`
 	FotoProfil    string `gorm:"type:varchar(100)"`
 	Email         string `gorm:"type:varchar(100);uniqueIndex;not null"`
@@ -22,7 +22,7 @@ type UserAuth struct {
 }
 
 type UserProfile struct {
-	ID             uint   `gorm:"primaryKey"`
+	NIK            uint   `gorm:"primaryKey;type:int;uniqueIndex;not null"`
 	NPWP           string `gorm:"type:varchar(25);uniqueIndex;not null"`
 	NamaWajibPajak string `gorm:"type:varchar(255);not null"`
 	TipeWajibPajak string `gorm:"type:varchar(50)"`
@@ -32,7 +32,7 @@ type UserProfile struct {
 	UpdatedAt      time.Time
 	DeletedAt      gorm.DeletedAt `gorm:"index"`
 
-	UserAuth UserAuth `gorm:"foreignKey:UserProfileID;references:ID"`
+	UserAuth UserAuth `gorm:"foreignKey:UserProfileID;references:NIK"`
 
 	Billings   []Billing   `gorm:"foreignKey:UserProfileID"`
 	ReportSPTs []ReportSPT `gorm:"foreignKey:UserProfileID"`

@@ -3,21 +3,26 @@ package utils
 import (
 	"context"
 	"errors"
+	"fmt"
+	"math/rand"
 	"time"
 
+	"github.com/RajaSunrise/pajakku/config"
 	"github.com/RajaSunrise/pajakku/internal/databases"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("your-secret-key") // Change this to a secure key
+var cfg = config.AppConfig
+
+var jwtSecret = []byte(cfg.JWT.Secret) // Change this to a secure key
 
 type Claims struct {
-	UserID uint   `json:"user_id"`
+	UserID string `json:"user_id"`
 	Email  string `json:"email"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(userID uint, email string) (string, error) {
+func GenerateToken(userID string, email string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
 		UserID: userID,
@@ -65,4 +70,17 @@ func ValidateToken(tokenString string) (*Claims, error) {
 
 func InvalidateToken(tokenString string) error {
 	return databases.RDB.Del(context.Background(), tokenString).Err()
+}
+
+// GenerateRandomID generates a random numeric string with length between 8 and 10 digits
+func GenerateRandomID() string {
+	rand.Seed(time.Now().UnixNano())
+	length := rand.Intn(3) + 8 // 8, 9, or 10
+	min := 1
+	for i := 1; i < length; i++ {
+		min *= 10
+	}
+	max := min*10 - 1
+	id := rand.Intn(max-min+1) + min
+	return fmt.Sprintf("%0*d", length, id)
 }

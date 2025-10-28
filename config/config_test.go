@@ -16,7 +16,7 @@ func TestLoadConfig(t *testing.T) {
 		"DB_USER":     os.Getenv("DB_USER"),
 		"DB_PASSWORD": os.Getenv("DB_PASSWORD"),
 		"DB_NAME":     os.Getenv("DB_NAME"),
-		"TimeZone":     os.Getenv("TimeZone"),
+		"TimeZone":    os.Getenv("TimeZone"),
 		"JWT_SECRET":  os.Getenv("JWT_SECRET"),
 	}
 

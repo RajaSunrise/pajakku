@@ -7,11 +7,11 @@ import (
 
 type UserProfileRepository interface {
 	CreateProfile(profile *models.UserProfile) error
-	GetProfileByID(id uint) (*models.UserProfile, error)
-	GetProfileByUserID(userID uint) (*models.UserProfile, error)
+	GetProfileByNIK(nik uint) (*models.UserProfile, error)
+	GetProfileByUserID(userID string) (*models.UserProfile, error)
 	GetProfileByNPWP(npwp string) (*models.UserProfile, error)
 	UpdateProfile(profile *models.UserProfile) error
-	DeleteProfile(id uint) error
+	DeleteProfileByNIK(nik uint) error
 }
 
 type userProfileRepository struct {
@@ -26,15 +26,15 @@ func (r *userProfileRepository) CreateProfile(profile *models.UserProfile) error
 	return r.db.Create(profile).Error
 }
 
-func (r *userProfileRepository) GetProfileByID(id uint) (*models.UserProfile, error) {
+func (r *userProfileRepository) GetProfileByNIK(nik uint) (*models.UserProfile, error) {
 	var profile models.UserProfile
-	err := r.db.First(&profile, id).Error
+	err := r.db.First(&profile, nik).Error
 	return &profile, err
 }
 
-func (r *userProfileRepository) GetProfileByUserID(userID uint) (*models.UserProfile, error) {
+func (r *userProfileRepository) GetProfileByUserID(userID string) (*models.UserProfile, error) {
 	var profile models.UserProfile
-	err := r.db.Joins("UserAuth").Where(`"UserAuth".id = ?`, userID).First(&profile).Error;
+	err := r.db.Joins("UserAuth").Where(`"UserAuth".id = ?`, userID).First(&profile).Error
 	return &profile, err
 }
 
@@ -48,6 +48,6 @@ func (r *userProfileRepository) UpdateProfile(profile *models.UserProfile) error
 	return r.db.Save(profile).Error
 }
 
-func (r *userProfileRepository) DeleteProfile(id uint) error {
-	return r.db.Delete(&models.UserProfile{}, id).Error
+func (r *userProfileRepository) DeleteProfileByNIK(nik uint) error {
+	return r.db.Delete(&models.UserProfile{}, nik).Error
 }

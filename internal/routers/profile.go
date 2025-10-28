@@ -18,7 +18,7 @@ func SetupRouteProfile(app *fiber.App) {
 
 	// Routes Data Pajak/Profile Pajak
 	users := app.Group("/api/v1/users")
-	users.Post("/", middlewares.JWTAuth(), handler.CreateUsersProfile)
-	users.Put("/", middlewares.JWTAuth(), handler.UpdateUsersProfile)
-	users.Get("/", middlewares.JWTAuth(), handler.GetProfileByID)
+	users.Post("/", middlewares.JWTAuth, handler.CreateUsersProfile)
+	users.Put("/", middlewares.JWTAuth, handler.UpdateUsersProfile)
+	users.Get("/", middlewares.JWTAuth, handler.GetProfileByID)
 }

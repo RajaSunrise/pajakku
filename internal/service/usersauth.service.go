@@ -47,6 +47,7 @@ func (s *usersAuthService) Register(req *request.CreateUsersAuth) error {
 	}
 
 	user := &models.UserAuth{
+		ID:       utils.GenerateRandomID(),
 		Email:    req.Email,
 		Password: string(hashedPassword),
 		Role:     req.Role,

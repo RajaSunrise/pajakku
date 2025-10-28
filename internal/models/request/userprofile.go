@@ -1,6 +1,7 @@
 package request
 
 type CreateUsersProfile struct {
+	NIK            uint `json:"nik" validate:"required, min=16, max=20"`
 	NPWP           string `json:"npwp" validate:"required, min=8, max=100"`
 	NamaWajibPajak string `json:"nama_wajib_pajak" validate:"required, min=8, max=100"`
 	TipeWajibPajak string `json:"tipe_wajib_pajak" validate:"required, min=6, max=50"`
@@ -9,6 +10,7 @@ type CreateUsersProfile struct {
 }
 
 type UpdateUsersProfile struct {
+	NIK            uint `json:"nik" validate:"required, min=16, max=20"`
 	NPWP           string `json:"npwp" validate:"omitempty, min=8, max=100"`
 	NamaWajibPajak string `json:"nama_wajib_pajak" validate:"omitempty, min=8, max=100"`
 	TipeWajibPajak string `json:"tipe_wajib_pajak" validate:"omitempty, min=6, max=50"`
