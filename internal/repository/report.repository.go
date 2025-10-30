@@ -5,49 +5,42 @@ import (
 	"gorm.io/gorm"
 )
 
-type ReportRepository interface {
-	CreateReport(report *models.ReportSPT) error
-	GetReportByID(id uint) (*models.ReportSPT, error)
-	GetReportsByUserID(userID string) ([]*models.ReportSPT, error)
-	GetReportByNTTE(ntte string) (*models.ReportSPT, error)
-	UpdateReport(report *models.ReportSPT) error
-	DeleteReport(id uint) error
+type TaxReturnRepository interface {
+	CreateTaxReturn(taxReturn *models.TaxReturn) error
+	GetTaxReturnByID(id uint) (*models.TaxReturn, error)
+	GetTaxReturnsByUserID(userID uint) ([]*models.TaxReturn, error)
+	UpdateTaxReturn(taxReturn *models.TaxReturn) error
+	DeleteTaxReturn(id uint) error
 }
 
-type reportRepository struct {
+type taxReturnRepository struct {
 	db *gorm.DB
 }
 
-func NewReportRepository(db *gorm.DB) ReportRepository {
-	return &reportRepository{db: db}
+func NewTaxReturnRepository(db *gorm.DB) TaxReturnRepository {
+	return &taxReturnRepository{db: db}
 }
 
-func (r *reportRepository) CreateReport(report *models.ReportSPT) error {
-	return r.db.Create(report).Error
+func (r *taxReturnRepository) CreateTaxReturn(taxReturn *models.TaxReturn) error {
+	return r.db.Create(taxReturn).Error
 }
 
-func (r *reportRepository) GetReportByID(id uint) (*models.ReportSPT, error) {
-	var report models.ReportSPT
-	err := r.db.First(&report, id).Error
-	return &report, err
+func (r *taxReturnRepository) GetTaxReturnByID(id uint) (*models.TaxReturn, error) {
+	var taxReturn models.TaxReturn
+	err := r.db.First(&taxReturn, id).Error
+	return &taxReturn, err
 }
 
-func (r *reportRepository) GetReportsByUserID(userID string) ([]*models.ReportSPT, error) {
-	var reports []*models.ReportSPT
-	err := r.db.Where("user_profile_id = ?", userID).Find(&reports).Error
-	return reports, err
+func (r *taxReturnRepository) GetTaxReturnsByUserID(userID uint) ([]*models.TaxReturn, error) {
+	var taxReturns []*models.TaxReturn
+	err := r.db.Where("user_id = ?", userID).Find(&taxReturns).Error
+	return taxReturns, err
 }
 
-func (r *reportRepository) GetReportByNTTE(ntte string) (*models.ReportSPT, error) {
-	var report models.ReportSPT
-	err := r.db.Where("ntte = ?", ntte).First(&report).Error
-	return &report, err
+func (r *taxReturnRepository) UpdateTaxReturn(taxReturn *models.TaxReturn) error {
+	return r.db.Save(taxReturn).Error
 }
 
-func (r *reportRepository) UpdateReport(report *models.ReportSPT) error {
-	return r.db.Save(report).Error
-}
-
-func (r *reportRepository) DeleteReport(id uint) error {
-	return r.db.Delete(&models.ReportSPT{}, id).Error
+func (r *taxReturnRepository) DeleteTaxReturn(id uint) error {
+	return r.db.Delete(&models.TaxReturn{}, id).Error
 }

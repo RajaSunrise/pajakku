@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"errors"
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -19,14 +18,16 @@ var jwtSecret = []byte(cfg.JWT.Secret) // Change this to a secure key
 type Claims struct {
 	UserID string `json:"user_id"`
 	Email  string `json:"email"`
+	RoleID uint   `json:"role_id"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(userID string, email string) (string, error) {
+func GenerateToken(userID string, email string, roleID uint) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
 		UserID: userID,
 		Email:  email,
+		RoleID: roleID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -73,8 +74,8 @@ func InvalidateToken(tokenString string) error {
 }
 
 // GenerateRandomID generates a random numeric string with length between 8 and 10 digits
-func GenerateRandomID() string {
-	rand.Seed(time.Now().UnixNano())
+func GenerateRandomID() uint {
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 	length := rand.Intn(3) + 8 // 8, 9, or 10
 	min := 1
 	for i := 1; i < length; i++ {
@@ -82,5 +83,5 @@ func GenerateRandomID() string {
 	}
 	max := min*10 - 1
 	id := rand.Intn(max-min+1) + min
-	return fmt.Sprintf("%0*d", length, id)
+	return uint(id)
 }

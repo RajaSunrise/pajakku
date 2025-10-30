@@ -10,15 +10,13 @@ import (
 
 func SetupRouteAuth(app *fiber.App) {
 	// Initialize dependencies
-	repo := repository.NewUsersAuthRepository(databases.DB)
-	svc := service.NewUsersAuthService(repo)
-	handler := handlers.NewUsersAuthHandler(svc)
+	userRepo := repository.NewUserRepository(databases.DB)
+	roleRepo := repository.NewRoleRepository(databases.DB)
+	userSvc := service.NewUserService(userRepo, roleRepo)
+	authHandler := handlers.NewAuthHandler(userSvc)
 
 	// Routes
-	auth := app.Group("/")
-	auth.Post("/register", handler.Register)
-	auth.Post("/login", handler.Login)
-	auth.Post("/forget-password", handler.ForgetPassword)
-	auth.Post("/reset-password", handler.ResetPassword)
-	auth.Post("/logout", handler.Logout)
+	auth := app.Group("/api/v1/auth")
+	auth.Post("/signup", authHandler.Signup)
+	auth.Post("/login", authHandler.Login)
 }

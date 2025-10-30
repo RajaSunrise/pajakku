@@ -11,6 +11,10 @@ database:
   ssl_mode: "disable"
   time_zone: "Asia/Jakarta"
 
+admin:
+  email: "indratax@gmail.com"
+  password: "password123"
+
 redis:
   host: "localhost"
   port: 6379

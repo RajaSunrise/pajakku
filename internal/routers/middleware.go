@@ -5,7 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupMiddleware(app *fiber.App)  {
+func SetupMiddleware(app *fiber.App) {
 	app.Use(middlewares.CORS())
 	app.Use(middlewares.RateLimiter())
 }

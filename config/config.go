@@ -14,6 +14,7 @@ type Config struct {
 	Redis    RedisConfig    `mapstructure:"redis"`
 	JWT      JWTConfig      `mapstructure:"jwt"`
 	Log      LogConfig      `mapstructure:"log"`
+	Admin    AdminConfig    `mapstructure:"admin"`
 }
 
 type LogConfig struct {
@@ -47,6 +48,11 @@ type JWTConfig struct {
 	ExpiryHour int    `mapstructure:"expiry_hour"`
 }
 
+type AdminConfig struct {
+	Email    string `mapstructure:"email"`
+	Password string `mapstructure:"password"`
+}
+
 var AppConfig Config
 
 func LoadConfig() {
@@ -67,6 +73,8 @@ func LoadConfig() {
 	viper.SetDefault("jwt.secret", "your-secret-key")
 	viper.SetDefault("jwt.expiry_hour", 24)
 	viper.SetDefault("log.level", "info")
+	viper.SetDefault("admin.email", "admin@example.com")
+	viper.SetDefault("admin.password", "admin123")
 
 	// Read from config file
 	viper.SetConfigName("config")

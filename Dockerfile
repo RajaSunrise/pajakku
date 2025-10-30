@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o main cmd/api/main.go
+RUN GOEXPERIMENT=greenteagc go build -ldflags="-s -w" -o main cmd/api/main.go
 
 FROM alpine:latest
 

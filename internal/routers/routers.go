@@ -7,18 +7,33 @@ import (
 func Routes(app *fiber.App) {
 	// Setup Middlewares
 	SetupMiddleware(app)
-	
-	// Setup routes Auth
+
+	// Setup routes auth
 	SetupRouteAuth(app)
 
-	// Setup routes Users
-	SetupRouteProfile(app)
+	// Setup routes users
+	SetupRouteUser(app)
 
-	// Setup routes reports
-	SetupRouteReport(app)
+	// Setup routes roles
+	SetupRouteRole(app)
 
-	// Setup routes billings
-	SetupRouteBiling(app)
+	// Setup routes attachments
+	SetupRouteAttachment(app)
+
+	// Setup routes audit logs
+	SetupRouteAuditLog(app)
+
+	// Setup routes invoices
+	SetupRouteInvoice(app)
+
+	// Setup routes notifications
+	SetupRouteNotification(app)
+
+	// Setup routes payments
+	SetupRoutePayment(app)
+
+	// Setup routes tax types
+	SetupRouteTaxType(app)
 
 	// Setup routes metrics
 	SetupRouteMetrics(app)

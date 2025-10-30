@@ -13,7 +13,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-
 func run(shutdown chan os.Signal) error {
 	// Load configuration
 	config.LoadConfig()

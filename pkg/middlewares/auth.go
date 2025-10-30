@@ -12,19 +12,20 @@ func JWTAuth(c *fiber.Ctx) error {
 	if authHeader == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing Token"})
 	}
-	
+
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	if tokenString == authHeader {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid Token"})
 	}
-	
+
 	claims, err := utils.ValidateToken(tokenString)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid Token"})
 	}
-	
+
 	c.Locals("userID", claims.UserID)
 	c.Locals("email", claims.Email)
-	
+	c.Locals("roleID", claims.RoleID)
+
 	return c.Next()
 }
