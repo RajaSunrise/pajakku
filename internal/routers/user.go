@@ -20,7 +20,7 @@ func SetupRouteUser(app *fiber.App) {
 	users := app.Group("/api/v1/users")
 	users.Post("/", middlewares.JWTAuth, middlewares.RoleAuth("admin"), handler.CreateUser)
 	users.Get("/:id", middlewares.JWTAuth, handler.GetUserByID)
-	users.Get("/", middlewares.JWTAuth, middlewares.RoleAuth("admin"), handler.GetAllUsers)
-	users.Put("/:id", middlewares.JWTAuth, middlewares.RoleAuth("admin"), handler.UpdateUser)
+	users.Get("/", middlewares.JWTAuth, handler.GetAllUsers)
+	users.Put("/:id", middlewares.JWTAuth, handler.UpdateUser)
 	users.Delete("/:id", middlewares.JWTAuth, middlewares.RoleAuth("admin"), handler.DeleteUser)
 }

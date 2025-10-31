@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/RajaSunrise/pajakku/internal/models/request"
+	"github.com/RajaSunrise/pajakku/internal/models/response"
 	"github.com/RajaSunrise/pajakku/internal/service"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
@@ -58,6 +59,21 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 	logrus.Info("Get all users request received")
 
+	userID := c.Locals("userID").(uint)
+	roleID := c.Locals("roleID").(uint)
+
+	if roleID != 1 {
+		// Not admin, return only current user's data
+		resp, err := h.service.GetUserByID(userID)
+		if err != nil {
+			logrus.WithError(err).Warn("User not found")
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
+		}
+		logrus.Info("Current user data retrieved successfully")
+		return c.JSON([]response.UserResponse{*resp})
+	}
+
+	// Admin, return all users
 	resp, err := h.service.GetAllUsers()
 	if err != nil {
 		logrus.WithError(err).Error("Failed to get all users")
@@ -77,10 +93,26 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
+	userID := c.Locals("userID").(uint)
+	roleID := c.Locals("roleID").(uint)
+
 	var req request.UpdateUser
 	if err := c.BodyParser(&req); err != nil {
 		logrus.WithError(err).Warn("Failed to parse update user request body")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
+	}
+
+	if roleID != 1 {
+		// Not admin
+		if uint(id) != userID {
+			logrus.Warn("Non-admin user trying to update another user")
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "You can only update your own data"})
+		}
+		// Prevent non-admin from updating role and status
+		if req.RoleID != 0 || req.StatusAktif != nil {
+			logrus.Warn("Non-admin user trying to update restricted fields")
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "You cannot update role or status"})
+		}
 	}
 
 	resp, err := h.service.UpdateUser(uint(id), &req)
